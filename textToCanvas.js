@@ -6,31 +6,38 @@
 			this.$element    = $($element); //jQuery object
 			this.$canvas     = null;
 
-			this.init();
+			//Add width callback
+			if(this.options.width){
+				typeof this.options.width == 'function' ?
+								this.options.width = this.options.width.call(this, this.$element[0]) :
+								this.options.width;
+			}
+			//Add height callback
+			if(this.options.height){
+				typeof this.options.height == 'function' ?
+								this.options.height = this.options.height.call(this, this.$element[0]) :
+								this.options.height
+			}
+
+			this.draw(this.$element, this.options.width, this.options.height);
 		}
 
 		RenderCanvasText.DEFAULTS = {
-			 listener: false
-			,fontStyle:'lighter 12px Arial,Helvetica,Geneva,sans-serif'
-			,fillStyle:'#000000'
-			,width: 120
-			,height: 19
+			 handler: false // bool || function
+			,fontStyle:'lighter 12px Arial,Helvetica,Geneva,sans-serif' // string
+			,fillStyle:'#000000' // string
+			,width: 150 // number || function
+			,height: 10 // number || function
+			,message: '' // string
 		};
 
 		RenderCanvasText.prototype = {
-			init: function(){
-				if (this.$canvas){
-					return this;
-				}
-				return this.draw(this.$element, this.options.width, this.options.height);;
-			},
 			draw: function($element, $width, $height) {
 				//draw markup
-				var $this = this;
 				var canvas = this.createCanvas($width, $height); // create and add canvas
 				var ctx = canvas.ctx;
 
-				if (typeof canvas != "undefined" && $element != null) {
+				if (typeof canvas != "undefined" && canvas != null) {
 					ctx.setTransform(1,0,0,1,0,0); // set default
 					ctx.globalAlpha = 1;
 					ctx.fillStyle = "White";
@@ -46,28 +53,62 @@
 					//Set a random id on each canvas we create
 					canvas.setAttribute('id', this.getUID('textToCanvas'));
 
-					//Add listener callback
-					typeof this.options.listener == 'function' ?
-								 this.options.listener.call(this, canvas, this.$element[0]) :
-								 this.options.listener;
+					//Add listener callback and cursor hand
+					if(this.options.handler){
+						canvas.setAttribute('style', 'cursor:pointer');
+						typeof this.options.handler == 'function' ?
+										this.options.handler.call(this, canvas, this.$element[0]) :
+										// Enforce function value with a warning in console
+										console.warn('this.options.handler must be a function')
+					}
+
+					if(this.options.message){
+						typeof this.options.message == 'string' ?
+										canvas.innerHTML = this.options.message :
+										// Enforce string value with a warning in console
+										console.warn('this.options.message must be a string');
+					}
 
 					//Insert the canvas into DOM
 					this.insertIntoDom($element, canvas, this.getContainer());
-
-					//We have created the layout if we got here, epic!, populate the object.
-					this.$canvas = document.getElementById(canvas.id);
 				}
-				return this.$canvas;
-		},
+				return this;
+			},
 			createCanvas: function($width, $height){
 				var canvas = document.createElement("canvas");
-				canvas.width  = $width;
-				canvas.height = $height;
-				canvas.ctx    = canvas.getContext("2d");
+						canvas.width  = $width;
+						canvas.height = $height;
+						canvas.ctx    = canvas.getContext("2d");
+
 				return canvas;
 			},
-			//http://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
+			insertIntoDom: function($element, $canvas, $container) {
+				if($container instanceof jQuery){
+					$container = $element.parents().find($container);
+					$container.append($canvas);
+				}else{
+					$container = document.getElementById($container);
+					$container.appendChild($canvas);
+				}
+				return $canvas;
+			},
+			getContainer: function(){
+				return this.options.container ? (typeof this.options.container == 'function' ?
+								this.options.container.call(this, this.$element[0]) :
+								this.options.container) :
+								this.$element;
+			},
+			getUID: function(prefix) {
+				do prefix += ~~(Math.random() * 1000000);
+				while (document.getElementById(prefix));
+				return prefix
+			},
+			getWidth: function(ctx, text){
+				var width;
+				return width = ctx.measureText(text).width + 12; // add some extra pixels
+			},
 			subPixelText: function(ctx, text, x, y, fontHeight){
+				//http://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
 				var width = ctx.measureText(text).width + 12; // add some extra pixels
 				var hOffset = Math.floor(fontHeight * 0.7);
 				var canvas = this.createCanvas(width * 3, fontHeight);
@@ -85,24 +126,6 @@
 				canvas.ctx.putImageData(canvas.ctx.getImageData(0, 0, width*3, fontHeight),0,0);
 				ctx.drawImage(canvas, 0, 0, width-1, fontHeight, x, y-hOffset, width-1, fontHeight);
 				// done
-			},
-			getContainer: function(){
-				return this.options.container ? this.options.container : this.$element;
-			},
-			insertIntoDom: function($element, $canvas, $container) {
-				if($container instanceof jQuery){
-					$container = $element.parents().find($container);
-					$container.append($canvas);
-				}else{
-					$container = document.getElementById($container);
-					$container.appendChild($canvas);
-				}
-				return $canvas;
-			},
-			getUID: function (prefix) {
-				do prefix += ~~(Math.random() * 1000000);
-				while (document.getElementById(prefix));
-				return prefix
 			}
 		};
 
