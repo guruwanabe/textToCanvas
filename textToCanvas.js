@@ -4,7 +4,6 @@
 		function RenderCanvasText($element, $options){
 			this.options     = $options;
 			this.$element    = $($element); //jQuery object
-			this.$canvas     = null;
 
 			//Add width callback
 			if(this.options.width){
