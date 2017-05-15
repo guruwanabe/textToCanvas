@@ -47,8 +47,9 @@ function TextToCanvas($element, $options){
 
 TextToCanvas.DEFAULTS = {
 	 handler: false // bool || function
-	,fontStyle:'lighter 12px Arial,Helvetica,Geneva,sans-serif' // string
-	,fillStyle:'#000000' // string
+	,fontStyle: 'lighter 12px Arial,Helvetica,Geneva,sans-serif' // string
+	,fillStyle: '#000000' // string
+	,background: 'white' // string
 	,message: '' // string
 	,textParams: { // object
 		x: 0, // number
@@ -81,27 +82,27 @@ TextToCanvas.prototype = {
 		if (typeof canvas != "undefined" && canvas != null) {
 			ctx.setTransform(1,0,0,1,0,0); // set default
 			ctx.globalAlpha = 1;
-			ctx.fillStyle = "White";
+			ctx.fillStyle = this.options.background;
 			ctx.fillRect(0,0,canvas.width,canvas.height);
 			ctx.fillStyle = this.options.fillStyle;
 			ctx.font = this.options.fontStyle;
+			ctx.fontAlign = "left";
+			// turn of smoothing
+			ctx.imageSmoothingEnabled = false;
+			ctx.mozImageSmoothingEnabled = false;
 
-			this.subPixelText(ctx,
-					this.options.text,
-					this.options.textParams.x,
-					this.options.textParams.y,
-					25
-			);
+			//Draw the text
+                	ctx.fillText(this.options.text, this.options.textParams.x, this.options.textParams.y);
 			//Set a random id on each canvas we create
 			canvas.setAttribute('id', this.getUID('textToCanvas'));
-
+			canvas.style.verticalAlign = 'top';
 			//Add listener callback and cursor hand
 			if(this.options.handler){
-				canvas.setAttribute('style', 'cursor:pointer');
+				canvas.style.cursor = 'pointer';
 				typeof this.options.handler == 'function' ?
-						this.options.handler.call(this, canvas, this.$element[0]) :
+					this.options.handler.call(this, canvas, this.$element[0]) :
 					// Enforce function value with a warning in console
-						console.warn('handler must be a function')
+					console.warn('handler must be a function')
 			}
 			//Add a message inside the canvas tags
 			if(this.options.message){
@@ -195,37 +196,6 @@ TextToCanvas.prototype = {
 
 		test.remove();
 		return dimensions;
-	},
-
-	/**
-	 * Transforms the text into sub-pixel text
-	 * http://stackoverflow.com/questions/40066166/canvas-text-rendering-blurry
-	 *
-	 * @param ctx {object}
-	 * @param text {string}
-	 * @param x {number}
-	 * @param y {number}
-	 * @param fontHeight {number}
-	 * @return void
-	 */
-	subPixelText: function(ctx, text, x, y, fontHeight){
-		var width   = ctx.measureText(text).width + 12; // add some extra pixels
-		var hOffset = Math.floor(fontHeight * 0.7);
-		var canvas  = this.createCanvas(width * 3, fontHeight);
-
-		canvas.ctx.font      = ctx.font;
-		canvas.ctx.fillStyle = ctx.fillStyle;
-		canvas.ctx.fontAlign = "left";
-		// turn of smoothing
-		canvas.ctx.imageSmoothingEnabled = false;
-		canvas.ctx.mozImageSmoothingEnabled = false;
-		// copy existing pixels to new canvas
-		canvas.ctx.drawImage(ctx.canvas,x -2, y - hOffset, width, fontHeight, 0, 0, width, fontHeight);
-		canvas.ctx.fillText(text,0,hOffset);    // draw thw text 3 time the width
-		// convert to sub pixel
-		canvas.ctx.putImageData(canvas.ctx.getImageData(0, 0, width*3, fontHeight),0,0);
-		ctx.drawImage(canvas, 0, 0, width-1, fontHeight, x, y-hOffset, width-1, fontHeight);
-		// done
 	}
 };
 
