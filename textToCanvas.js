@@ -108,7 +108,7 @@ TextToCanvas.prototype = {
 			if(this.options.message){
 				typeof this.options.message == 'string' ?
 						canvas.innerHTML = this.options.message :
-						canvas.innerHTML = this.options.message.toString
+						canvas.innerHTML = this.options.message.toString()
 			}
 
 			//Insert the canvas into DOM
