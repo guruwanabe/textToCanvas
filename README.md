@@ -7,18 +7,18 @@ Just add '<script src="../textToCanvas.js"></script>' anywhere after jQuery.
 
 ## Usage
 
-`TextToCanvas.DEFAULTS = {
-    handler: false,  
-    disabled: false,  
-    fontStyle: 'lighter 12px Arial,Helvetica,Geneva,sans-serif',  
-    fillStyle: '#000000',  
-    background: 'white',  
-    message: '',  
-    textParams: {  
-        x: 0,  
-        y: 12  
-    }  
-};`  
+`TextToCanvas.DEFAULTS = {  
+    handler: false,    
+    disabled: false,    
+    fontStyle: 'lighter 12px Arial,Helvetica,Geneva,sans-serif',    
+    fillStyle: '#000000',    
+    background: 'white',    
+    message: '',    
+    textParams: {    
+        x: 0,    
+        y: 12    
+    }    
+};`    
 
 //js  
 `$('#selector').textToCanvas({$options}),`
@@ -28,9 +28,9 @@ Just add '<script src="../textToCanvas.js"></script>' anywhere after jQuery.
 
 ## Credits
 
-Bogdan Stanciu
-bp.stanciu@gmail.com
-@bp.stanciu
+Bogdan Stanciu  
+bp.stanciu@gmail.com  
+@bp.stanciu  
 
 ## License
 
